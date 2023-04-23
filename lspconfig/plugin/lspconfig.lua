@@ -159,7 +159,8 @@ vim.diagnostic.config { virtual_text = false }
 require('lspconfig').texlab.setup {}
 require('lspconfig').lua_ls.setup {}
 require('lspconfig').ltex.setup {}
-require('lspconfig').vimls.setup{}
+require('lspconfig').vimls.setup {}
+require('lspconfig').bashls.setup {}
 
 -- keymap
 -- Diagnostic keymap
@@ -182,3 +183,37 @@ vim.keymap.set('n', 'mu', vim.lsp.buf.implementation)
 vim.keymap.set('n', 'mk', vim.lsp.buf.signature_help)
 vim.keymap.set('n', 'mt', vim.lsp.buf.type_definition)
 vim.keymap.set('n', 'mc', vim.lsp.buf.code_action)
+
+-- Tex keymap
+function TeXkeybinds()
+	vim.keymap.set("i", ",c", "<esc>:w<CR>:TexlabBuild<CR>")
+	vim.keymap.set("i", ",s", "<esc>:w<CR>:TexlabForward<CR>")
+	vim.keymap.set("i", ",v", "<esc>:e ~/.local/share/nvim/site/pack/plugins/start/lausnip/snippets/latex.json<CR>")
+	vim.keymap.set("i", ",g", "<esc>/<++><CR>:nohlsearch<CR>c4l")
+	vim.keymap.set("i", ",r", "$ <--> $<++><esc>?<--><CR>N:nohlsearch<CR>c4l")
+	vim.keymap.set("i", ",t", "$$ <--> $$<++><esc>?<--><CR>N:nohlsearch<CR>c4l")
+	vim.keymap.set("i", ",d", "_{<-->}<++><esc>?<--><CR>N:nohlsearch<CR>di{i")
+	vim.keymap.set("i", ",e", "^{<-->}<++><esc>?<--><CR>N:nohlsearch<CR>di{i")
+	vim.keymap.set("i", ".b", "\\beta")
+	vim.keymap.set("i", ".a", "\\alpha")
+	vim.keymap.set("i", ".g", "\\gamma")
+	vim.keymap.set("i", ".d", "\\delta")
+	vim.keymap.set("i", ".e", "\\epsilon")
+	vim.keymap.set("i", ".t", "\\eta")
+	vim.keymap.set("i", ".r", "\\rho")
+	vim.keymap.set("i", ".G", "\\Gamma")
+	vim.keymap.set("i", ".h", "\\theta")
+	vim.keymap.set("i", ".m", "\\sigma")
+	vim.keymap.set("i", ".f", "\\phi")
+	vim.keymap.set("i", ".p", "\\pi")
+	vim.keymap.set("i", ".u", "\\mu")
+	vim.keymap.set("i", ".D", "\\Delta")
+	vim.keymap.set("i", ".n", "\\nabla")
+	vim.keymap.set("i", ".i", "\\in")
+	vim.keymap.set("i", ".I", "\\infty")
+	vim.keymap.set("i", ".R", "\\Ric")
+	vim.keymap.set("i", ".S", "\\sec")
+	vim.keymap.set("i", ".v", "\\vol")
+end
+vim.api.nvim_create_autocmd('BufWinEnter, BufEnter', { pattern = { "*.tex" }, callback = function() TeXkeybinds() end })
+

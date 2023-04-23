@@ -1,4 +1,3 @@
--- Last Change: 2022 Apr 16
 
 if vim.g.loaded_nvim_treesitter then
   return
@@ -33,4 +32,10 @@ api.nvim_create_autocmd("Filetype", {
   desc = "Reload query",
 })
 
+vim.opt.runtimepath:append("$HOME/local/nvim/lib/nvim")
 
+require 'nvim-treesitter.configs'.setup {
+	parser_install_dir = "$HOME/local/nvim/lib/nvim",
+}
+
+--vim.treesitter.language.add('zsh', { path = "$HOME/local/nvim/lib/nvim/parser/bash.so" })

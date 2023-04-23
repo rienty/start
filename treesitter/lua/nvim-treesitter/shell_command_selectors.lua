@@ -3,6 +3,8 @@ local utils = require "nvim-treesitter.utils"
 
 -- Convert path for cmd.exe on Windows.
 -- This is needed when vim.opt.shellslash is in use.
+---@param p string
+---@return string
 local function cmdpath(p)
   if vim.opt.shellslash:get() then
     local r = p:gsub("/", "\\")
@@ -14,6 +16,11 @@ end
 
 local M = {}
 
+-- Returns the mkdir command based on the OS
+---@param directory string
+---@param cwd string
+---@param info_msg string
+---@return table
 function M.select_mkdir_cmd(directory, cwd, info_msg)
   if fn.has "win32" == 1 then
     return {
@@ -38,6 +45,10 @@ function M.select_mkdir_cmd(directory, cwd, info_msg)
   end
 end
 
+-- Returns the remove command based on the OS
+---@param file string
+---@param info_msg string
+---@return table
 function M.select_rm_file_cmd(file, info_msg)
   if fn.has "win32" == 1 then
     return {
@@ -60,13 +71,18 @@ function M.select_rm_file_cmd(file, info_msg)
   end
 end
 
+---@param executables string[]
 ---@return string|nil
 function M.select_executable(executables)
-  return vim.tbl_filter(function(c)
+  return vim.tbl_filter(function(c) ---@param c string
     return c ~= vim.NIL and fn.executable(c) == 1
   end, executables)[1]
 end
 
+-- Returns the compiler arguments based on the compiler and OS
+---@param repo InstallInfo
+---@param compiler string
+---@return string[]
 function M.select_compiler_args(repo, compiler)
   if string.match(compiler, "cl$") or string.match(compiler, "cl.exe$") then
     return {
@@ -94,11 +110,15 @@ function M.select_compiler_args(repo, compiler)
       "parser.so",
       "-I./src",
       repo.files,
-      "-shared",
       "-Os",
     }
+    if fn.has "mac" == 1 then
+      table.insert(args, "-bundle")
+    else
+      table.insert(args, "-shared")
+    end
     if
-      #vim.tbl_filter(function(file)
+      #vim.tbl_filter(function(file) ---@param file string
         local ext = vim.fn.fnamemodify(file, ":e")
         return ext == "cc" or ext == "cpp" or ext == "cxx"
       end, repo.files) > 0
@@ -112,6 +132,11 @@ function M.select_compiler_args(repo, compiler)
   end
 end
 
+-- Returns the compile command based on the OS and user options
+---@param repo InstallInfo
+---@param cc string
+---@param compile_location string
+---@return Command
 function M.select_compile_command(repo, cc, compile_location)
   local make = M.select_executable { "gmake", "make" }
   if
@@ -147,6 +172,10 @@ function M.select_compile_command(repo, cc, compile_location)
   end
 end
 
+-- Returns the remove command based on the OS
+---@param cache_folder string
+---@param project_name string
+---@return Command
 function M.select_install_rm_cmd(cache_folder, project_name)
   if fn.has "win32" == 1 then
     local dir = cache_folder .. "\\" .. project_name
@@ -166,6 +195,11 @@ function M.select_install_rm_cmd(cache_folder, project_name)
   end
 end
 
+-- Returns the move command based on the OS
+---@param from string
+---@param to string
+---@param cwd string
+---@return Command
 function M.select_mv_cmd(from, to, cwd)
   if fn.has "win32" == 1 then
     return {
@@ -186,6 +220,12 @@ function M.select_mv_cmd(from, to, cwd)
   end
 end
 
+---@param repo InstallInfo
+---@param project_name string
+---@param cache_folder string
+---@param revision string|nil
+---@param prefer_git boolean
+---@return table
 function M.select_download_commands(repo, project_name, cache_folder, revision, prefer_git)
   local can_use_tar = vim.fn.executable "tar" == 1 and vim.fn.executable "curl" == 1
   local is_github = repo.url:find("github.com", 1, true)
@@ -277,9 +317,16 @@ function M.select_download_commands(repo, project_name, cache_folder, revision, 
   end
 end
 
+---@param dir string
+---@param command string
+---@return string command
 function M.make_directory_change_for_command(dir, command)
   if fn.has "win32" == 1 then
-    return string.format("pushd %s & %s & popd", cmdpath(dir), command)
+    if string.find(vim.o.shell, "cmd") ~= nil then
+      return string.format("pushd %s & %s & popd", cmdpath(dir), command)
+    else
+      return string.format("pushd %s ; %s ; popd", cmdpath(dir), command)
+    end
   else
     return string.format("cd %s;\n %s", dir, command)
   end

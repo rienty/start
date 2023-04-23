@@ -21,8 +21,11 @@ local M = {}
 local config = {
 	ensure_installed = {
 		"lua",
-		"bibtex",
 		"latex",
+		"bibtex",
+		"vim",
+		"bash",
+		"c",
 	},
 	sync_install = false,
 	ignore_install = { "haskell" },

@@ -38,3 +38,4 @@ vim.api.nvim_create_autocmd('BufWinEnter', { callback = function() vim.opt.curso
 
 vim.g.tex_flavor = "latex"
 
+
